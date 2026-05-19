@@ -1,0 +1,25 @@
+{
+  "name": "Trail & Ipertrofia",
+  "short_name": "Trail App",
+  "description": "Programma 6 settimane Trail Running + Ipertrofia - Sub 1h20m Trail delle Longane",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0c0f",
+  "theme_color": "#0a0c0f",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

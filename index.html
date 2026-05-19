@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Trail App">
+  <title>Trail & Ipertrofia</title>
+  <meta name="theme-color" content="#0a0c0f">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #0a0c0f; --bg2: #111418; --bg3: #161b22; --border: #21262d;
+      --text: #e6edf3; --muted: #8b949e; --dim: #484f58;
+      --accent: #f97316; --green: #22c55e; --blue: #3b82f6;
+      --yellow: #eab308; --red: #ef4444; --purple: #a855f7;
+    }
+    html, body { background: var(--bg); color: var(--text); font-family: 'Barlow Condensed', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { display: none; }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0f1419 0%, #1a0a00 50%, #0a0c0f 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 22px 16px 18px;
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .header-logo {
+      background: var(--accent); width: 50px; height: 50px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+      clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+    }
+    .header-text { flex: 1; }
+    .header-eyebrow { font-size: 9px; letter-spacing: 3px; color: var(--accent); font-family: 'Barlow', sans-serif; font-weight: 600; margin-bottom: 2px; }
+    .header h1 { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -0.5px; text-transform: uppercase; }
+    .header h1 span { color: var(--accent); }
+    .header-sub { font-size: 11px; color: var(--muted); font-family: 'Barlow', sans-serif; margin-top: 4px; line-height: 1.4; }
+    .header-target { background: rgba(249,115,22,0.1); border: 1px solid var(--accent); padding: 8px 12px; text-align: center; flex-shrink: 0; }
+    .header-target-val { font-size: 20px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .header-target-label { font-size: 8px; color: var(--muted); letter-spacing: 2px; font-family: 'Barlow', sans-serif; }
+
+    /* TABS */
+    .tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; position: sticky; top: 86px; z-index: 99; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      padding: 12px 14px; color: var(--muted);
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 10px;
+      letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap;
+      transition: color 0.2s; flex-shrink: 0;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* CONTENT */
+    .content { padding: 20px 16px 80px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* SECTION TITLE */
+    .sec-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; margin-top: 20px; }
+    .sec-title:first-child { margin-top: 0; }
+
+    /* PHASE PILLS */
+    .phase-pills { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .phase-pill { padding: 6px 12px; border: 1px solid; font-size: 10px; letter-spacing: 2px; font-weight: 700; }
+
+    /* WEEK PILLS */
+    .week-pills { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .week-pill {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--muted); padding: 8px 14px; font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-align: center;
+      transition: all 0.15s; line-height: 1.3;
+    }
+    .week-pill.active { background: var(--accent); border-color: var(--accent); color: #000; }
+    .week-pill .sub { font-size: 8px; letter-spacing: 1px; display: block; margin-top: 1px; }
+
+    /* WEEK BANNER */
+    .week-banner { padding: 14px 16px; margin-bottom: 18px; border-left: 4px solid; background: var(--bg3); border-radius: 0 4px 4px 0; }
+    .week-banner-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .week-banner-focus { font-size: 12px; color: var(--muted); font-family: 'Barlow', sans-serif; margin-top: 6px; line-height: 1.5; }
+    .badge { padding: 3px 9px; font-size: 9px; letter-spacing: 2px; font-weight: 700; border: 1px solid; }
+
+    /* SESSION CARDS */
+    .session-card { background: var(--bg3); border: 1px solid var(--border); margin-bottom: 8px; border-radius: 4px; overflow: hidden; transition: border-color 0.2s; }
+    .session-card.open { border-color: var(--accent); }
+    .session-header { padding: 13px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+    .session-header:active { background: rgba(255,255,255,0.04); }
+    .session-icon-box { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; border: 1px solid; border-radius: 2px; }
+    .session-meta { flex: 1; min-width: 0; }
+    .session-tags { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; flex-wrap: wrap; }
+    .session-day { font-size: 10px; color: var(--muted); letter-spacing: 2px; font-family: 'Barlow', sans-serif; }
+    .session-type-tag { font-size: 8px; letter-spacing: 2px; padding: 1px 5px; font-weight: 700; }
+    .session-int-tag { font-size: 8px; letter-spacing: 1px; font-weight: 700; }
+    .session-label { font-size: 13px; font-weight: 700; line-height: 1.2; }
+    .session-chevron { color: var(--dim); font-size: 14px; flex-shrink: 0; transition: transform 0.2s; }
+    .session-card.open .session-chevron { transform: rotate(180deg); }
+    .session-body { display: none; border-top: 1px solid var(--border); padding: 14px; background: rgba(255,255,255,0.015); }
+    .session-card.open .session-body { display: block; }
+    .block-title { font-size: 9px; letter-spacing: 3px; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; margin-top: 14px; }
+    .block-title:first-child { margin-top: 0; }
+    .block-items { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+    .block-item { display: flex; gap: 8px; align-items: flex-start; padding: 6px 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); font-family: 'Barlow', sans-serif; font-size: 12px; line-height: 1.5; }
+    .block-item-arrow { color: var(--accent); flex-shrink: 0; margin-top: 3px; font-size: 9px; }
+    .light-variant { margin-top: 10px; padding: 10px 12px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.3); font-family: 'Barlow', sans-serif; font-size: 12px; }
+    .light-variant-label { font-size: 9px; color: var(--blue); letter-spacing: 2px; font-weight: 700; display: block; margin-bottom: 3px; }
+    .session-note { margin-top: 10px; padding: 10px 12px; background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.3); font-family: 'Barlow', sans-serif; font-size: 12px; }
+    .session-note-label { font-size: 9px; color: var(--yellow); letter-spacing: 2px; font-weight: 700; display: block; margin-bottom: 3px; }
+
+    /* CARD generic */
+    .card { background: var(--bg3); border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; border-radius: 4px; }
+    .card-accent-left { border-left: 4px solid var(--accent); border-radius: 0 4px 4px 0; }
+    .card-red { border: 1px solid var(--red); border-left: 4px solid var(--red); }
+    .card-yellow { border: 1px solid var(--yellow); border-left: 4px solid var(--yellow); }
+
+    /* ATLETA */
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: var(--bg3); border: 1px solid var(--border); padding: 14px 12px; border-radius: 4px; }
+    .stat-label { font-size: 9px; color: var(--muted); letter-spacing: 3px; margin-bottom: 4px; font-family: 'Barlow', sans-serif; }
+    .stat-value { font-size: 22px; font-weight: 900; color: var(--accent); }
+    .pb-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .pb-card { flex: 1; text-align: center; padding: 12px 8px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 4px; }
+    .pb-time { font-size: 20px; font-weight: 900; color: var(--blue); }
+    .pb-dist { font-size: 9px; color: var(--muted); letter-spacing: 2px; font-family: 'Barlow', sans-serif; margin-top: 2px; }
+    .strength-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); margin-bottom: 6px; border-radius: 4px; }
+    .strength-ex { font-family: 'Barlow', sans-serif; font-size: 14px; }
+    .strength-load { font-weight: 800; color: var(--accent); font-size: 15px; }
+    .note-item { padding: 8px 12px; background: rgba(239,68,68,0.05); border-left: 2px solid rgba(239,68,68,0.4); font-family: 'Barlow', sans-serif; font-size: 12px; line-height: 1.5; margin-bottom: 6px; }
+
+    /* RITMI */
+    .zone-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg3); border: 1px solid; margin-bottom: 8px; border-radius: 4px; }
+    .zone-box { width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; border: 2px solid; border-radius: 2px; }
+    .zone-name { font-size: 12px; color: var(--muted); font-family: 'Barlow', sans-serif; }
+    .zone-pace { font-size: 20px; font-weight: 900; }
+    .anticrampi-item { padding: 12px 14px; background: rgba(249,115,22,0.06); border: 1px solid rgba(249,115,22,0.2); margin-bottom: 8px; border-radius: 4px; }
+    .anticrampi-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .anticrampi-desc { font-family: 'Barlow', sans-serif; font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .prog-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; border: 1px solid; margin-bottom: 4px; border-radius: 2px; }
+    .prog-row.target { background: rgba(249,115,22,0.15); border-color: var(--accent); }
+    .prog-row.normal { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
+
+    /* NUTRITION */
+    .tdee-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .tdee-card { background: var(--bg3); border: 1px solid; padding: 14px 16px; border-radius: 4px; }
+    .tdee-label { font-size: 9px; color: var(--muted); letter-spacing: 3px; font-family: 'Barlow', sans-serif; margin-bottom: 4px; }
+    .tdee-value { font-size: 20px; font-weight: 900; }
+    .macro-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .macro-card { flex: 1; text-align: center; padding: 14px 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 4px; }
+    .macro-icon { font-size: 22px; margin-bottom: 4px; }
+    .macro-amount { font-size: 16px; font-weight: 900; color: var(--accent); }
+    .macro-name { font-size: 9px; color: var(--muted); letter-spacing: 2px; font-family: 'Barlow', sans-serif; margin-top: 2px; }
+    .supp-card { padding: 13px 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); margin-bottom: 8px; border-radius: 4px; }
+    .supp-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .supp-name { font-size: 14px; font-weight: 800; }
+    .supp-dose { font-weight: 700; color: var(--accent); font-size: 13px; white-space: nowrap; }
+    .supp-timing { font-family: 'Barlow', sans-serif; font-size: 11px; color: var(--muted); }
+    .supp-note { color: var(--green); }
+    .prerace-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; background: rgba(234,179,8,0.06); border-left: 2px solid rgba(234,179,8,0.5); margin-bottom: 6px; font-family: 'Barlow', sans-serif; font-size: 12px; line-height: 1.5; }
+
+    /* EMERGENCY */
+    .emg-header { background: var(--bg3); border: 2px solid var(--accent); border-left: 6px solid var(--accent); padding: 18px; margin-bottom: 14px; border-radius: 0 4px 4px 0; }
+    .emg-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .emg-title { font-size: 19px; font-weight: 900; letter-spacing: 0.5px; }
+    .emg-sub { font-size: 11px; color: var(--accent); letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
+    .emg-time { text-align: center; flex-shrink: 0; }
+    .emg-time-val { font-size: 26px; font-weight: 900; color: var(--accent); line-height: 1; }
+    .emg-time-label { font-size: 8px; color: var(--muted); letter-spacing: 2px; font-family: 'Barlow', sans-serif; }
+    .emg-rationale { font-family: 'Barlow', sans-serif; font-size: 12px; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 12px; }
+    .step-card { background: var(--bg3); border: 1px solid; border-left: 4px solid; padding: 16px; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; border-radius: 0 4px 4px 0; }
+    .step-left { flex-shrink: 0; text-align: center; min-width: 44px; }
+    .step-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+    .step-order { font-size: 20px; font-weight: 900; line-height: 1; }
+    .step-dur { font-size: 9px; padding: 2px 7px; border: 1px solid; font-weight: 700; letter-spacing: 1px; display: inline-block; margin-top: 4px; }
+    .step-content { flex: 1; }
+    .step-title { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+    .step-detail { font-family: 'Barlow', sans-serif; font-size: 12px; color: var(--muted); line-height: 1.7; }
+    .rules-card { background: var(--bg3); border: 1px solid var(--red); border-left: 4px solid var(--red); padding: 16px; margin-bottom: 10px; border-radius: 0 4px 4px 0; }
+    .rules-label { font-size: 10px; color: var(--red); letter-spacing: 3px; font-weight: 700; margin-bottom: 10px; }
+    .rule-item { font-family: 'Barlow', sans-serif; font-size: 12px; line-height: 1.6; padding: 7px 10px; background: rgba(239,68,68,0.05); border-left: 2px solid rgba(239,68,68,0.4); margin-bottom: 6px; }
+    .rule-arrow { color: var(--red); font-weight: 700; margin-right: 6px; }
+    .equip-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .equip-card { padding: 8px 12px; background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.25); flex: 1; min-width: 90px; text-align: center; border-radius: 4px; }
+    .equip-name { font-weight: 700; font-size: 12px; }
+    .equip-note { font-size: 9px; color: var(--muted); letter-spacing: 1px; font-family: 'Barlow', sans-serif; margin-top: 2px; }
+
+    /* FOOTER */
+    .footer { text-align: center; font-family: 'Barlow', sans-serif; font-size: 10px; color: var(--dim); letter-spacing: 2px; border-top: 1px solid var(--border); padding: 20px 0 10px; margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">🏔️</div>
+    <div class="header-text">
+      <div class="header-eyebrow">PROGRAMMA 6 SETTIMANE</div>
+      <h1>Trail Running<br><span>& Ipertrofia</span></h1>
+      <div class="header-sub">Sub 1h20m Trail delle Longane · 21 anni · 62→65 kg</div>
+    </div>
+    <div class="header-target">
+      <div class="header-target-val">1h20m</div>
+      <div class="header-target-label">TARGET</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="programma">📅 Programma</button>
+    <button class="tab-btn" data-tab="atleta">👤 Profilo</button>
+    <button class="tab-btn" data-tab="ritmi">⚡ Ritmi</button>
+    <button class="tab-btn" data-tab="nutrition">🥗 Alimentazione</button>
+    <button class="tab-btn" data-tab="emergency">🏭 Post-Fabbrica</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== PROGRAMMA ===== -->
+    <div class="tab-panel active" id="tab-programma">
+      <div class="phase-pills">
+        <div class="phase-pill" style="border-color:#3b82f6;background:rgba(59,130,246,0.1);color:#3b82f6;">FASE 1: ADATTAMENTO · W1-W2</div>
+        <div class="phase-pill" style="border-color:#f97316;background:rgba(249,115,22,0.1);color:#f97316;">FASE 2: COSTRUZIONE · W3-W6</div>
+      </div>
+      <div class="week-pills" id="week-pills"></div>
+      <div class="week-banner" id="week-banner"></div>
+      <div id="sessions-list"></div>
+    </div>
+
+    <!-- ===== ATLETA ===== -->
+    <div class="tab-panel" id="tab-atleta">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">ETÀ</div><div class="stat-value">21 anni</div></div>
+        <div class="stat-card"><div class="stat-label">ALTEZZA</div><div class="stat-value">180 cm</div></div>
+        <div class="stat-card"><div class="stat-label">PESO ATTUALE</div><div class="stat-value">62 kg</div></div>
+        <div class="stat-card"><div class="stat-label">TARGET PESO</div><div class="stat-value" style="color:var(--green)">65–66 kg</div></div>
+      </div>
+
+      <div class="sec-title">Personal Bests Corsa</div>
+      <div class="pb-row">
+        <div class="pb-card"><div class="pb-time">3:28</div><div class="pb-dist">1 km</div></div>
+        <div class="pb-card"><div class="pb-time">20:50</div><div class="pb-dist">5 km</div></div>
+        <div class="pb-card"><div class="pb-time">47:17</div><div class="pb-dist">10 km</div></div>
+      </div>
+
+      <div class="sec-title">Massimali Forza</div>
+      <div class="strength-row"><span class="strength-ex">Squat</span><span class="strength-load">90 kg × 3</span></div>
+      <div class="strength-row"><span class="strength-ex">Squat Bulgaro</span><span class="strength-load">32 kg × 8</span></div>
+      <div class="strength-row"><span class="strength-ex">Affondi</span><span class="strength-load">40 kg × 14</span></div>
+
+      <div class="sec-title" style="color:var(--red);">Criticità & Note Biomeccaniche</div>
+      <div class="note-item">🦶 Piede cavo con supinazione — Rilascio plantare quotidiano con pallina + stretching alluce</div>
+      <div class="note-item">🦵 Pregresso infortunio ginocchio — Forza come rinforzo e stabilizzazione, non carico estremo</div>
+      <div class="note-item">⚡ Crampi ultima salita TDL 2023 (1h33m) — Protocollo magnesio + gel elettrolitici + isometria squat bulgaro</div>
+      <div class="note-item">🏭 Lavoro fisico 8h/die — Routine Post-Fabbrica 20 min disponibile + Variante Light</div>
+      <div class="note-item">⚽ Calcetto sabato — Domenica sempre Z1 rigenerante (mai Z4)</div>
+      <div class="note-item">🏋️ Panca regolabile disponibile — Military Press seduta 90° + Chest Supported Row + Spinta inclinata 30-45°</div>
+    </div>
+
+    <!-- ===== RITMI ===== -->
+    <div class="tab-panel" id="tab-ritmi">
+
+      <div class="zone-row" style="border-color:rgba(34,197,94,0.4)">
+        <div class="zone-box" style="color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,0.15)">Z1</div>
+        <div><div class="zone-name">Recupero Attivo</div><div class="zone-pace" style="color:#22c55e">5:30–6:00 min/km</div></div>
+      </div>
+      <div class="zone-row" style="border-color:rgba(59,130,246,0.4)">
+        <div class="zone-box" style="color:#3b82f6;border-color:#3b82f6;background:rgba(59,130,246,0.15)">Z2</div>
+        <div><div class="zone-name">Aerobico Base</div><div class="zone-pace" style="color:#3b82f6">5:00–5:15 min/km</div></div>
+      </div>
+      <div class="zone-row" style="border-color:rgba(234,179,8,0.4)">
+        <div class="zone-box" style="color:#eab308;border-color:#eab308;background:rgba(234,179,8,0.15)">Z3</div>
+        <div><div class="zone-name">Aerobico Potenza</div><div class="zone-pace" style="color:#eab308">4:50–5:00 min/km</div></div>
+      </div>
+      <div class="zone-row" style="border-color:rgba(249,115,22,0.4)">
+        <div class="zone-box" style="color:#f97316;border-color:#f97316;background:rgba(249,115,22,0.15)">Z4</div>
+        <div><div class="zone-name">Soglia Anaerobica</div><div class="zone-pace" style="color:#f97316">~4:40 min/km</div></div>
+      </div>
+
+      <div class="sec-title">Protocollo Anti-Crampi</div>
+      <div class="anticrampi-item">
+        <div class="anticrampi-title">🏋️ Isometria Squat Bulgaro</div>
+        <div class="anticrampi-desc">3 secondi di tenuta nel punto di massima contrazione (posizione bassa) con piede su panca piana. Rinforza il pattern neuromuscolare critico per le salite finali.</div>
+      </div>
+      <div class="anticrampi-item">
+        <div class="anticrampi-title">⏱️ Recupero Serie Pesanti</div>
+        <div class="anticrampi-desc">2 min 30 sec di recupero tra le serie heavy del Bulgaro. Non scendere sotto questo tempo nelle settimane di picco.</div>
+      </div>
+      <div class="anticrampi-item">
+        <div class="anticrampi-title">💊 Magnesio Bisglicinato</div>
+        <div class="anticrampi-desc">300–400 mg la sera, ogni giorno. In settimana di gara portare a 400 mg. Forma bisglicinata = massimo assorbimento.</div>
+      </div>
+      <div class="anticrampi-item">
+        <div class="anticrampi-title">🧃 Gel + Elettroliti in Gara</div>
+        <div class="anticrampi-desc">1 gel ogni 35–40 min con sodio ≥ 150 mg. Iniziare a 20 min, non aspettare i crampi. Sale aggiuntivo ai ristori.</div>
+      </div>
+
+      <div class="sec-title">Progressione Squat Bulgaro</div>
+      <div class="prog-row normal"><span style="font-weight:700;color:var(--muted);font-size:13px">W1</span><span style="font-family:'Barlow',sans-serif;font-size:13px">14 kg</span></div>
+      <div class="prog-row normal"><span style="font-weight:700;color:var(--muted);font-size:13px">W2</span><span style="font-family:'Barlow',sans-serif;font-size:13px">16 kg</span></div>
+      <div class="prog-row normal"><span style="font-weight:700;color:var(--muted);font-size:13px">W3</span><span style="font-family:'Barlow',sans-serif;font-size:13px">18 kg</span></div>
+      <div class="prog-row normal"><span style="font-weight:700;color:var(--muted);font-size:13px">W4</span><span style="font-family:'Barlow',sans-serif;font-size:13px">14 kg (deload)</span></div>
+      <div class="prog-row target"><span style="font-weight:900;color:var(--accent);font-size:13px">W5</span><span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:var(--accent)">20 kg ← TARGET ⭐</span></div>
+      <div class="prog-row normal"><span style="font-weight:700;color:var(--muted);font-size:13px">W6</span><span style="font-family:'Barlow',sans-serif;font-size:13px">16 kg (taper)</span></div>
+    </div>
+
+    <!-- ===== NUTRITION ===== -->
+    <div class="tab-panel" id="tab-nutrition">
+      <div class="tdee-row">
+        <div class="tdee-card" style="border-color:rgba(59,130,246,0.4)">
+          <div class="tdee-label">TDEE STIMATO</div>
+          <div class="tdee-value" style="color:var(--blue)">~3.200–3.400 kcal</div>
+        </div>
+        <div class="tdee-card" style="border-color:rgba(249,115,22,0.4)">
+          <div class="tdee-label">SURPLUS</div>
+          <div class="tdee-value" style="color:var(--accent)">+300–400 kcal</div>
+        </div>
+      </div>
+
+      <div class="sec-title">Macronutrienti Giornalieri</div>
+      <div class="macro-row">
+        <div class="macro-card"><div class="macro-icon">🥩</div><div class="macro-amount">160–170g</div><div class="macro-name">Proteine</div></div>
+        <div class="macro-card"><div class="macro-icon">🍚</div><div class="macro-amount">400–430g</div><div class="macro-name">Carboidrati</div></div>
+        <div class="macro-card"><div class="macro-icon">🫒</div><div class="macro-amount">80–90g</div><div class="macro-name">Grassi</div></div>
+      </div>
+
+      <div class="sec-title">Integrazione</div>
+      <div class="supp-card">
+        <div class="supp-header"><span class="supp-name">Magnesio Bisglicinato</span><span class="supp-dose">300–400 mg</span></div>
+        <div class="supp-timing">Sera, dopo cena · <span class="supp-note">Anti-crampi primario</span></div>
+      </div>
+      <div class="supp-card">
+        <div class="supp-header"><span class="supp-name">Gel Isotonico + Elettroliti</span><span class="supp-dose">1 gel / 35–40 min</span></div>
+        <div class="supp-timing">Durante gara/uscita lunga · <span class="supp-note">Sodio ≥ 150mg/gel</span></div>
+      </div>
+      <div class="supp-card">
+        <div class="supp-header"><span class="supp-name">Creatina Monoidrato</span><span class="supp-dose">3–5 g</span></div>
+        <div class="supp-timing">Post-allenamento · <span class="supp-note">Supporto ipertrofia</span></div>
+      </div>
+      <div class="supp-card">
+        <div class="supp-header"><span class="supp-name">Vitamina D3 + K2</span><span class="supp-dose">2000 UI</span></div>
+        <div class="supp-timing">Con pasto grasso · <span class="supp-note">Salute ossea e muscolare</span></div>
+      </div>
+
+      <div class="sec-title">Timing Alimentazione Pre-Gara (W6)</div>
+      <div class="card card-yellow" style="padding:16px">
+        <div class="prerace-item">Sera prima gara: Pasta + olio evo + parmigiano — 900–1000 kcal — ore 20:00</div>
+        <div class="prerace-item">Mattina gara (H-3): Riso + banana + miele — 600 kcal</div>
+        <div class="prerace-item">H-45 min: Gel di attivazione + 500ml acqua elettrolitica</div>
+        <div class="prerace-item">IN GARA: Gel ogni 35–40 min a partire da 20 min (sodio ≥150mg/gel)</div>
+        <div class="prerace-item">Ristori: Acqua + pizzico sale rosa — No alimenti solidi pesanti</div>
+        <div class="prerace-item">POST-GARA: Proteine 40g + carbo 80g entro 30 min</div>
+      </div>
+    </div>
+
+    <!-- ===== EMERGENCY ===== -->
+    <div class="tab-panel" id="tab-emergency">
+      <div class="emg-header">
+        <div class="emg-top">
+          <span style="font-size:32px">🏭</span>
+          <div style="flex:1">
+            <div class="emg-title">Routine Post-Fabbrica</div>
+            <div class="emg-sub">Per i giorni di stanchezza &gt; 7/10</div>
+          </div>
+          <div class="emg-time">
+            <div class="emg-time-val">20'</div>
+            <div class="emg-time-label">TOTALE</div>
+          </div>
+        </div>
+        <div class="emg-rationale">Quando il lavoro fisico di 8 ore ti ha svuotato, questa routine mantiene lo stimolo senza aggiungere stress. Priorità: recupero lombare, movimento di qualità, nessun cedimento tecnico.</div>
+      </div>
+
+      <div class="step-card" style="border-color:rgba(34,197,94,0.4);border-left-color:#22c55e">
+        <div class="step-left">
+          <span class="step-emoji">🦶</span>
+          <div class="step-order" style="color:#22c55e">01</div>
+          <div class="step-dur" style="color:#22c55e;border-color:rgba(34,197,94,0.4)">5 min</div>
+        </div>
+        <div class="step-content">
+          <div class="step-title" style="color:#22c55e">Rilascio Miofasciale Plantare</div>
+          <div class="step-detail">Pallina da tennis/lacrosse sotto il piede. 2 min 30 sec per piede. Pressione media su arco plantare e tallone. Scarica l'arto inferiore dopo ore in piedi.</div>
+        </div>
+      </div>
+
+      <div class="step-card" style="border-color:rgba(59,130,246,0.4);border-left-color:#3b82f6">
+        <div class="step-left">
+          <span class="step-emoji">💪</span>
+          <div class="step-order" style="color:#3b82f6">02</div>
+          <div class="step-dur" style="color:#3b82f6;border-color:rgba(59,130,246,0.4)">6 min</div>
+        </div>
+        <div class="step-content">
+          <div class="step-title" style="color:#3b82f6">Spinta Manubri su Panca Piana</div>
+          <div class="step-detail">3 serie × 10 rep | Carico 10–12 kg per mano | Riposo 90 sec. Panca piana = schiena supportata, nessuna tensione lombare. Tecnica pulita, nessun arco forzato.</div>
+        </div>
+      </div>
+
+      <div class="step-card" style="border-color:rgba(249,115,22,0.4);border-left-color:#f97316">
+        <div class="step-left">
+          <span class="step-emoji">🔝</span>
+          <div class="step-order" style="color:#f97316">03</div>
+          <div class="step-dur" style="color:#f97316;border-color:rgba(249,115,22,0.4)">5 min</div>
+        </div>
+        <div class="step-content">
+          <div class="step-title" style="color:#f97316">Trazioni con Buffer Ampio</div>
+          <div class="step-detail">2 serie | Fermati al 50% del massimale (es. se fai 8, fai 4). Riposo 2 min. Stimolo neuromuscolare senza affaticare il SNC. Qualità sopra quantità.</div>
+        </div>
+      </div>
+
+      <div class="step-card" style="border-color:rgba(168,85,247,0.4);border-left-color:#a855f7">
+        <div class="step-left">
+          <span class="step-emoji">🧠</span>
+          <div class="step-order" style="color:#a855f7">04</div>
+          <div class="step-dur" style="color:#a855f7;border-color:rgba(168,85,247,0.4)">5 min</div>
+        </div>
+        <div class="step-content">
+          <div class="step-title" style="color:#a855f7">Core — Plank o Dead Bug</div>
+          <div class="step-detail">Plank frontale: 3×30 sec con 30 sec riposo. Oppure Dead Bug: 3×8 per lato, lento e controllato. Attiva il core stabilizzatore senza caricare la colonna.</div>
+        </div>
+      </div>
+
+      <div class="rules-card">
+        <div class="rules-label">REGOLE INVIOLABILI</div>
+        <div class="rule-item"><span class="rule-arrow">→</span>Se avverti dolore lombare acuto → STOP, solo rilascio e stretching</div>
+        <div class="rule-item"><span class="rule-arrow">→</span>Non aumentare mai i carichi in questa routine: è mantenimento, non progressione</div>
+        <div class="rule-item"><span class="rule-arrow">→</span>Idratazione: 500 ml acqua prima di iniziare</div>
+        <div class="rule-item"><span class="rule-arrow">→</span>Post-routine: stretching hip flexor 2 min per lato</div>
+      </div>
+
+      <div class="sec-title">Attrezzatura</div>
+      <div class="equip-grid">
+        <div class="equip-card"><div class="equip-name">Panca piana</div><div class="equip-note">Supporto schiena</div></div>
+        <div class="equip-card"><div class="equip-name">Manubri 10–12 kg</div><div class="equip-note">Carico leggero</div></div>
+        <div class="equip-card"><div class="equip-name">Sbarra</div><div class="equip-note">Buffer 50%</div></div>
+        <div class="equip-card"><div class="equip-name">Tappetino</div><div class="equip-note">Dead Bug / Plank</div></div>
+        <div class="equip-card"><div class="equip-name">Pallina</div><div class="equip-note">Rilascio plantare</div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="footer">TRAIL RUNNING & IPERTROFIA · 6 SETTIMANE · OBIETTIVO SUB 1H20M</div>
+
+  <script>
+  (function () {
+    // ==============================
+    // DATA
+    // ==============================
+    const weeks = [
+      {
+        week: 1, phase: 1, phaseName: "Adattamento",
+        focus: "Introduzione ai volumi. Attivazione neuromuscolare. Base aerobica.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper A — Trazioni + Panca Inclinata", intensity: "moderate",
+            blocks: [
+              { title: "Riscaldamento (10 min)", items: ["Cerchi braccia 2×20", "Band pull-apart 2×15", "Rotazioni esterne spalla 2×15"] },
+              { title: "Main Work", items: [
+                "Trazioni Pronazione: 4×4-5 | Tempo 3-1-2 | Riposo 3 min",
+                "Spinta manubri PANCA INCLINATA 30-45° — 16kg: 4×8 | Tempo 3-0-1 | Riposo 2 min 30 sec",
+                "Military Press SEDUTO panca 90° — 14kg: 3×10 | Riposo 2 min | schiena supportata",
+                "Chest Supported Row PANCIA IN GIÙ — 18kg: 3×(3+3+3) cluster | Pausa 15 sec intra | Riposo 2 min 30 sec",
+              ]},
+              { title: "Accessori", items: ["Curl Hammer 12kg: 3×12", "Face Pull elastico: 3×15", "Plank laterale: 3×30 sec"] },
+            ],
+            lightVariant: "Trazioni 3×3 | Spinta panca piana 12kg 3×10 | Military Press seduto 10kg 3×8 | Solo accessori leggeri",
+          },
+          { day: "Martedì", type: "CORSA", label: "Z2 Aerobico Base", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["Riscaldamento 5 min camminata veloce", "35 min Z2 continuo — 5:00-5:15 min/km", "Defaticamento 5 min + rilascio plantare con pallina 3 min/piede", "Stretching dinamico alluce: rotazioni + mobilità metatarso 2×10 per piede"] }],
+            lightVariant: "30 min Z1 (5:30-6:00 min/km)",
+          },
+          { day: "Mercoledì", type: "RIPOSO", label: "Recupero Attivo", intensity: "rest",
+            blocks: [{ title: "Protocollo", items: ["Camminata 20-30 min (Z1)", "Mobilità fianchi e anche 10 min", "Rilascio miofasciale plantare + stretch fascia plantare", "Magnesio Bisglicinato 300mg la sera"] }],
+          },
+          { day: "Giovedì", type: "PESI", label: "Lower A — Stabilità + Forza Resistente", intensity: "moderate",
+            blocks: [
+              { title: "Riscaldamento (10 min)", items: ["Mobilità anca 2×10 per lato", "Squat corpo libero 2×15", "Attivazione glutei con band 2×15"] },
+              { title: "Main Work", items: [
+                "Squat Bulgaro 14kg: 4×8 | Piede posteriore su PANCA PIANA | ISOMETRIA 3 sec in basso | Riposo 2 min 30 sec",
+                "Affondi camminati 16kg: 3×12 per gamba | Riposo 2 min",
+                "Romanian Deadlift manubri 18kg: 3×10 | Riposo 2 min",
+                "Step-up SULLA PANCA PIANA 10kg: 3×12 per gamba | Riposo 90 sec | simula gradoni di sentiero",
+              ]},
+              { title: "Stabilità e Core", items: ["Single-leg Glute Bridge: 3×15 per lato", "Dead Bug: 3×10 per lato", "Calf Raise su scalino (piede cavo): 3×20 lento"] },
+            ],
+            lightVariant: "Squat bulgaro corpo libero 3×8 (piede su panca) | Affondi 10kg 3×10 | Solo stabilità",
+          },
+          { day: "Venerdì", type: "RIPOSO", label: "Riposo Totale / Mobilità", intensity: "rest",
+            blocks: [{ title: "Opzioni", items: ["Riposo completo", "Yoga/mobilità 20 min opzionale", "Preparazione mentale gara"] }],
+          },
+          { day: "Sabato", type: "CALCETTO", label: "Partita Calcetto", intensity: "high",
+            blocks: [{ title: "Gestione", items: ["Gel elettrolitico 20 min prima", "Idratazione: 500ml acqua + punta di sale rosa ogni 45 min", "Post: proteine 30g + carboidrati 60g entro 30 min"] }],
+          },
+          { day: "Domenica", type: "CORSA", label: "Rigenerante Z1 (post-calcetto)", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["20-25 min Z1 rigenerante — 5:30-6:00 min/km", "Terreno piatto o leggero trail", "Rilascio plantare post-corsa"] }],
+            note: "Se stanchezza >7/10: sostituire con camminata 30 min",
+          },
+        ],
+      },
+      {
+        week: 2, phase: 1, phaseName: "Adattamento",
+        focus: "Consolidamento pattern motori. Primo inserimento volume Z2. Aumento minimo pesi.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper A — Progressione (+1-2 kg)", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni Pronazione: 4×5-6 | Tempo 3-1-2 | Riposo 3 min",
+                "Spinta manubri PANCA INCLINATA 30-45° — 18kg: 4×8 | Tempo 3-0-1 | Riposo 2 min 30 sec",
+                "Military Press SEDUTO panca 90° — 16kg: 3×10 | Riposo 2 min",
+                "Chest Supported Row PANCIA IN GIÙ — 18kg: 3×(4+3+3) cluster | Pausa 15 sec | Riposo 2 min 30 sec",
+              ]},
+              { title: "Accessori", items: ["Curl Hammer 14kg: 3×10", "Lateral Raise 8kg: 3×15", "Plank 3×40 sec"] },
+            ],
+            lightVariant: "Routine Post-Fabbrica 20 min (tab dedicato)",
+          },
+          { day: "Martedì", type: "CORSA", label: "Z2 + Fartlek Leggero", intensity: "moderate",
+            blocks: [{ title: "Sessione", items: ["Riscaldamento 5 min", "25 min Z2 (5:00-5:15)", "3× [2 min Z3 (4:50) + 3 min Z2] — Fartlek aerobico", "Defaticamento 5 min + mobilità plantare"] }],
+          },
+          { day: "Mercoledì", type: "RIPOSO", label: "Recupero + Mobilità", intensity: "rest",
+            blocks: [{ title: "Protocollo", items: ["Come settimana 1 mercoledì"] }],
+          },
+          { day: "Giovedì", type: "PESI", label: "Lower A — +2 kg progressione", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Squat Bulgaro 16kg: 4×8 | Piede su PANCA PIANA | ISOMETRIA 3 sec | Riposo 2 min 30 sec",
+                "Affondi camminati 18kg: 3×12 per gamba | Riposo 2 min",
+                "Romanian Deadlift 20kg: 3×10 | Riposo 2 min",
+                "Step-up SULLA PANCA PIANA 12kg: 3×12 per gamba | Riposo 90 sec",
+              ]},
+              { title: "Stabilità", items: ["Single-leg Glute Bridge +5kg: 3×12", "Pallof Press elastico: 3×10 per lato", "Calf Raise eccentrico (3 sec giù): 3×15"] },
+            ],
+          },
+          { day: "Venerdì", type: "RIPOSO", label: "Riposo", intensity: "rest",
+            blocks: [{ title: "", items: ["Riposo completo o mobilità leggera"] }],
+          },
+          { day: "Sabato", type: "CALCETTO", label: "Partita Calcetto", intensity: "high",
+            blocks: [{ title: "Come W1", items: ["Stesso protocollo idratazione/integrazione"] }],
+          },
+          { day: "Domenica", type: "CORSA", label: "Uscita Lunga Z2", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["50-55 min Z2 — 5:00-5:15 min/km", "Se possibile: terreno vario con qualche salita breve", "Gel elettrolitico a 30 min se oltre 45 min"] }],
+            note: "Se calcetto sabato pesante → ridurre a 35 min Z1",
+          },
+        ],
+      },
+      {
+        week: 3, phase: 2, phaseName: "Costruzione",
+        focus: "Aumento volume corsa. Introduzione Z4 soglia. Carico pesi in progressione.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper B — Intensità Tempo", intensity: "high",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni Supinazione: 5×4 | Tempo 4-1-2 | Riposo 3 min",
+                "Spinta manubri PANCA INCLINATA — 18kg: 4×6 | Tempo 4-0-1 esplosivo su | Riposo 3 min",
+                "Military Press SEDUTO panca 90° — 16kg: 4×8 | Riposo 2 min 30 sec",
+                "Chest Supported Row PANCIA IN GIÙ — 20kg: 4×8 | Pausa 1 sec contrazione | Riposo 2 min 30 sec",
+              ]},
+              { title: "Accessori", items: ["Skull Crusher 10kg: 3×12", "Curl Concentrato 14kg: 3×10", "L-Sit Plank: 3×20 sec"] },
+            ],
+            lightVariant: "Volume ridotto del 30%, stesso schema",
+          },
+          { day: "Martedì", type: "CORSA", label: "Z4 Soglia — Intervalli", intensity: "high",
+            blocks: [{ title: "Sessione", items: ["Riscaldamento 10 min Z1-Z2", "4× [5 min Z4 (~4:40) + 3 min Z1 recupero]", "Defaticamento 10 min Z1", "Totale: ~45 min", "Gel isotonico pre-sessione se stomaco ok"] }],
+            lightVariant: "3× [4 min Z4 + 3 min Z1] — riduzione 25%",
+          },
+          { day: "Mercoledì", type: "PESI", label: "Lower B — Forza Resistente (opzionale)", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Squat Bulgaro 18kg: 4×8 | Piede su PANCA PIANA | ISOMETRIA 3 sec | Riposo 2 min 30 sec",
+                "Affondi 20kg: 3×10 per gamba | Riposo 2 min",
+                "Hip Thrust manubri 20kg: 4×10 | Riposo 2 min",
+                "Nordic Curl (assistito): 3×5 | Riposo 3 min",
+              ]},
+              { title: "Stabilità Avanzata", items: ["Single-leg RDL 12kg: 3×10", "Calf Raise su scalino 16kg: 3×15"] },
+            ],
+            note: "Sostituibile con riposo se stanchezza alta",
+          },
+          { day: "Giovedì", type: "RIPOSO", label: "Recupero Attivo", intensity: "rest",
+            blocks: [{ title: "", items: ["Camminata + mobilità + rilascio plantare"] }],
+          },
+          { day: "Venerdì", type: "PESI", label: "Upper A — Mantenimento", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni: 3×5 | Riposo 3 min",
+                "Spinta manubri PANCA INCLINATA — 18kg: 3×8",
+                "Military Press SEDUTO panca 90° — 16kg: 3×10",
+                "Face Pull elastico + Band Pull: 3×15",
+              ]},
+            ],
+            lightVariant: "Solo 2 esercizi principali se stanchezza",
+          },
+          { day: "Sabato", type: "CALCETTO", label: "Partita Calcetto", intensity: "high",
+            blocks: [{ title: "", items: ["Protocollo standard integrazione"] }],
+          },
+          { day: "Domenica", type: "CORSA", label: "Long Run Z2 con Dislivello", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["60-65 min Z2 su percorso variato", "Includere 2-3 salite brevi gestite in Z3", "Gel a 30 e 55 min", "Simulare uso bastoncini su pendenze >20%"] }],
+            note: "Post-calcetto → Z1, max 40 min",
+          },
+        ],
+      },
+      {
+        week: 4, phase: 2, phaseName: "Costruzione",
+        focus: "Scarico funzionale (50% volume). Consolidamento qualità. Recupero attivo.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper — Deload (volume -40%)", intensity: "easy",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni: 3×4 | Riposo 2 min 30 sec",
+                "Spinta manubri PANCA INCLINATA — 16kg: 3×6",
+                "Military Press SEDUTO panca 90° — 14kg: 3×8",
+                "Chest Supported Row panca — 16kg: 3×8",
+              ]},
+            ],
+          },
+          { day: "Martedì", type: "CORSA", label: "Z2 Defaticamento", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["30 min Z2 continuo — 5:00-5:15", "Enfasi sulla tecnica di corsa in salita (appoggio avampiede)"] }],
+          },
+          { day: "Mercoledì", type: "RIPOSO", label: "Riposo Totale", intensity: "rest",
+            blocks: [{ title: "", items: ["Riposo completo. Massaggio fai-da-te gambe. Sonno prioritario."] }],
+          },
+          { day: "Giovedì", type: "PESI", label: "Lower — Deload Stabilità", intensity: "easy",
+            blocks: [
+              { title: "Main Work", items: [
+                "Squat Bulgaro 14kg: 3×6 | Piede su PANCA PIANA | Isometria 3 sec",
+                "Affondi 14kg: 3×8",
+                "Hip Thrust 16kg: 3×8",
+                "Calf Raise: 2×15",
+              ]},
+            ],
+          },
+          { day: "Venerdì", type: "RIPOSO", label: "Riposo", intensity: "rest",
+            blocks: [{ title: "", items: ["Riposo o mobilità 15 min"] }],
+          },
+          { day: "Sabato", type: "CALCETTO", label: "Calcetto (opzionale)", intensity: "moderate",
+            blocks: [{ title: "", items: ["Se partecipazione: intensità moderata, non massimale"] }],
+          },
+          { day: "Domenica", type: "CORSA", label: "Z1 Rigenerante", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["25 min Z1 (5:30-6:00)", "Mobilità post-corsa 10 min"] }],
+          },
+        ],
+      },
+      {
+        week: 5, phase: 2, phaseName: "Costruzione",
+        focus: "Picco volume. Manubri 20kg lower body. Z4 intensificato. Simulazione gara.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper — Cluster Set Intensivo", intensity: "high",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni Pronazione: 5×5 | Tempo 3-1-2 | Riposo 3 min 30 sec",
+                "Spinta manubri PANCA INCLINATA — 20kg: 4×5 | Cluster 2+2+1 con 15 sec pausa | Riposo 3 min",
+                "Military Press SEDUTO panca 90° — 18kg: 4×8 | Riposo 2 min 30 sec",
+                "Chest Supported Row PANCIA IN GIÙ — 20kg: 4×8 | Isometria 1 sec in contrazione | Riposo 3 min",
+              ]},
+              { title: "Accessori Ipertrofia", items: ["Curl Hammer 16kg: 3×10", "Lateral Raise 10kg: 3×12", "Tricep Extension 12kg: 3×12"] },
+            ],
+            lightVariant: "Volume -30% stessi esercizi",
+          },
+          { day: "Martedì", type: "CORSA", label: "Z4 Soglia — Progressione", intensity: "high",
+            blocks: [{ title: "Sessione", items: ["Riscaldamento 10 min", "5× [6 min Z4 (~4:40) + 3 min Z1]", "Defaticamento 10 min", "Totale: ~65 min", "Gel isotonico a 20 min"] }],
+            lightVariant: "4× [5 min Z4 + 3 min Z1]",
+          },
+          { day: "Mercoledì", type: "PESI", label: "Lower B — 20kg MILESTONE ⭐", intensity: "high",
+            blocks: [
+              { title: "OBIETTIVO RAGGIUNTO: Manubri 20kg Lower Body", items: [
+                "Squat Bulgaro 20kg: 4×8 | Piede su PANCA PIANA | ISOMETRIA 3 sec | Riposo 2 min 30 sec ← MILESTONE W5",
+                "Affondi 20kg: 4×10 per gamba | Riposo 2 min 30 sec",
+                "Hip Thrust 20kg: 4×10 | Riposo 2 min",
+                "Nordic Curl: 3×6 | Riposo 3 min",
+              ]},
+              { title: "Stabilità", items: ["Single-leg RDL 14kg: 3×10", "Calf Raise su scalino 20kg: 3×15 | Eccentrico 3 sec"] },
+            ],
+          },
+          { day: "Giovedì", type: "RIPOSO", label: "Recupero Attivo Intenso", intensity: "rest",
+            blocks: [{ title: "", items: ["Camminata 30 min", "Rilascio miofasciale gambe (pallina + foam)", "Stretching isometrico psoas e flessori", "Magnesio extra 400mg"] }],
+          },
+          { day: "Venerdì", type: "PESI", label: "Upper — Mantenimento", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni: 3×5",
+                "Spinta manubri PANCA INCLINATA — 18kg: 3×8",
+                "Military Press SEDUTO panca 90° — 16kg: 3×8",
+                "Chest Supported Row panca — 18kg: 3×8",
+              ]},
+            ],
+          },
+          { day: "Sabato", type: "CALCETTO", label: "Calcetto", intensity: "high",
+            blocks: [{ title: "", items: ["Protocollo standard"] }],
+          },
+          { day: "Domenica", type: "CORSA", label: "Simulazione Gara — Long Run", intensity: "high",
+            blocks: [{ title: "Sessione Simulazione", items: ["Riscaldamento 10 min Z1", "70 min su percorso simile TDL (dislivello, fondo sterrato)", "Salite Z3-Z4, discese Z2", "Bastoncini su pendenze >20%", "Gel a 30 e 60 min + elettroliti", "Crampi: se avvertiti → 15 min camminata + idratazione"] }],
+            note: "Se calcetto pesante: 45 min Z2 su piano",
+          },
+        ],
+      },
+      {
+        week: 6, phase: 2, phaseName: "Taper + Gara",
+        focus: "Tapering pre-gara. Volume -30%. Qualità > quantità. Mantenimento picco.",
+        sessions: [
+          { day: "Lunedì", type: "PESI", label: "Upper — Tapering", intensity: "moderate",
+            blocks: [
+              { title: "Main Work", items: [
+                "Trazioni: 3×4-5 | Fresco e pulito",
+                "Spinta manubri PANCA INCLINATA — 18kg: 3×6",
+                "Military Press SEDUTO panca 90° — 16kg: 3×8",
+                "Chest Supported Row panca — 18kg: 3×8",
+              ]},
+            ],
+          },
+          { day: "Martedì", type: "CORSA", label: "Z4 Breve — Sharpening", intensity: "moderate",
+            blocks: [{ title: "Sessione", items: ["Riscaldamento 10 min", "3× [5 min Z4 + 3 min Z1] — Volume ridotto, stessa qualità", "Defaticamento 10 min"] }],
+          },
+          { day: "Mercoledì", type: "PESI", label: "Lower — Attivazione Leggera", intensity: "easy",
+            blocks: [
+              { title: "Main Work", items: [
+                "Squat Bulgaro 16kg: 3×6 | Piede su PANCA PIANA | Isometria 2 sec",
+                "Affondi 16kg: 3×8",
+                "Hip Thrust 18kg: 3×8",
+              ]},
+            ],
+          },
+          { day: "Giovedì", type: "RIPOSO", label: "Riposo Totale", intensity: "rest",
+            blocks: [{ title: "", items: ["Riposo completo. Preparazione kit gara. Carico glicogeno inizia."] }],
+          },
+          { day: "Venerdì", type: "CORSA", label: "Uscita di Attivazione", intensity: "easy",
+            blocks: [{ title: "Sessione", items: ["20 min Z1 + 4× [30 sec Z4 + 90 sec Z1]", "Solo per sentire le gambe sveglie", "No fatica: fermarsi se pesante"] }],
+          },
+          { day: "Sabato", type: "RIPOSO", label: "RIPOSO PRE-GARA", intensity: "rest",
+            blocks: [{ title: "Protocollo Pre-Gara", items: ["Riposo totale", "Pasto: pasta + olio evo + parmigiano (900-1000 kcal)", "Idratazione: 3L acqua + elettroliti", "Magnesio 400mg la sera", "Preparazione kit: bastoncini, gel (4-5), salt caps, scarpe", "Visualizzazione percorso"] }],
+          },
+          { day: "Domenica", type: "GARA", label: "🏆 TRAIL DELLE LONGANE — TARGET SUB 1H20M", intensity: "race",
+            blocks: [{ title: "Strategia di Gara", items: ["Partenza: Z3 gestito, non andare a bomba", "Salite: Z3-Z4, bastoncini >20%, passi corti e frequenti", "Discese: fidarsi delle gambe, corpo in avanti", "Gel a 20, 45 e 65 min", "Sale + acqua ogni ristoro", "Ultima salita (crampi 2023): ridurre ritmo, isometria mentale, respiro controllato"] }],
+          },
+        ],
+      },
+    ];
+
+    const typeConfig = {
+      PESI:     { color: "#f97316", icon: "🏋️" },
+      CORSA:    { color: "#3b82f6", icon: "🏃" },
+      RIPOSO:   { color: "#22c55e", icon: "😴" },
+      CALCETTO: { color: "#eab308", icon: "⚽" },
+      GARA:     { color: "#a855f7", icon: "🏆" },
+    };
+    const intensityConfig = {
+      high:     { color: "#ef4444", label: "ALTA",   bg: "rgba(239,68,68,0.12)" },
+      moderate: { color: "#f97316", label: "MEDIA",  bg: "rgba(249,115,22,0.12)" },
+      easy:     { color: "#22c55e", label: "BASSA",  bg: "rgba(34,197,94,0.12)" },
+      rest:     { color: "#3b82f6", label: "RIPOSO", bg: "rgba(59,130,246,0.12)" },
+      race:     { color: "#a855f7", label: "GARA",   bg: "rgba(168,85,247,0.15)" },
+    };
+
+    let activeWeek = 0;
+
+    // ===== WEEK PILLS =====
+    function buildWeekPills() {
+      const c = document.getElementById('week-pills');
+      c.innerHTML = '';
+      weeks.forEach((w, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'week-pill' + (i === activeWeek ? ' active' : '');
+        btn.innerHTML = 'W' + w.week + '<span class="sub">' + (w.phase === 1 ? 'ADP' : w.week === 6 ? 'TAPER' : 'BUILD') + '</span>';
+        btn.addEventListener('click', () => { activeWeek = i; buildWeekPills(); buildSessions(); });
+        c.appendChild(btn);
+      });
+    }
+
+    // ===== WEEK BANNER =====
+    function buildBanner() {
+      const w = weeks[activeWeek];
+      const phaseColor = w.phase === 1 ? '#3b82f6' : '#f97316';
+      const banner = document.getElementById('week-banner');
+      banner.style.borderLeftColor = phaseColor;
+
+      let badgeHTML = '';
+      if (w.week === 4) badgeHTML = '<div class="badge" style="color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,0.15)">DELOAD</div>';
+      if (w.week === 6) badgeHTML = '<div class="badge" style="color:#a855f7;border-color:#a855f7;background:rgba(168,85,247,0.15)">TAPER+GARA</div>';
+
+      banner.innerHTML = `
+        <div class="week-banner-title">
+          SETTIMANA ${w.week} — <span style="color:${phaseColor}">${w.phaseName.toUpperCase()}</span>
+          ${badgeHTML}
+        </div>
+        <div class="week-banner-focus">${w.focus}</div>
+      `;
+    }
+
+    // ===== SESSIONS =====
+    function buildSessions() {
+      buildBanner();
+      const w = weeks[activeWeek];
+      const container = document.getElementById('sessions-list');
+      container.innerHTML = '';
+
+      w.sessions.forEach((s, idx) => {
+        const ic = intensityConfig[s.intensity] || intensityConfig.easy;
+        const tc = typeConfig[s.type] || typeConfig.CORSA;
+
+        const card = document.createElement('div');
+        card.className = 'session-card';
+
+        const header = document.createElement('div');
+        header.className = 'session-header';
+        header.innerHTML = `
+          <div class="session-icon-box" style="background:${ic.bg};border-color:${ic.color}30">${tc.icon}</div>
+          <div class="session-meta">
+            <div class="session-tags">
+              <span class="session-day">${s.day.toUpperCase()}</span>
+              <span class="session-type-tag" style="background:${tc.color}18;color:${tc.color}">${s.type}</span>
+              <span class="session-int-tag" style="color:${ic.color}">${ic.label}</span>
+            </div>
+            <div class="session-label">${s.label}</div>
+          </div>
+          <div class="session-chevron">▾</div>
+        `;
+
+        const body = document.createElement('div');
+        body.className = 'session-body';
+
+        s.blocks.forEach(block => {
+          if (block.title) {
+            const t = document.createElement('div');
+            t.className = 'block-title';
+            t.textContent = block.title;
+            body.appendChild(t);
+          }
+          const items = document.createElement('div');
+          items.className = 'block-items';
+          block.items.forEach(item => {
+            const d = document.createElement('div');
+            d.className = 'block-item';
+            d.innerHTML = `<span class="block-item-arrow">▸</span><span>${item}</span>`;
+            items.appendChild(d);
+          });
+          body.appendChild(items);
+        });
+
+        if (s.lightVariant) {
+          const lv = document.createElement('div');
+          lv.className = 'light-variant';
+          lv.innerHTML = `<span class="light-variant-label">VARIANTE LIGHT</span>${s.lightVariant}`;
+          body.appendChild(lv);
+        }
+        if (s.note) {
+          const sn = document.createElement('div');
+          sn.className = 'session-note';
+          sn.innerHTML = `<span class="session-note-label">NOTA</span>${s.note}`;
+          body.appendChild(sn);
+        }
+
+        header.addEventListener('click', () => {
+          const isOpen = card.classList.contains('open');
+          container.querySelectorAll('.session-card.open').forEach(c => c.classList.remove('open'));
+          if (!isOpen) card.classList.add('open');
+        });
+
+        card.appendChild(header);
+        card.appendChild(body);
+        container.appendChild(card);
+      });
+    }
+
+    // ===== TABS =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // INIT
+    buildWeekPills();
+    buildSessions();
+  })();
+  </script>
+
+</body>
+</html>
